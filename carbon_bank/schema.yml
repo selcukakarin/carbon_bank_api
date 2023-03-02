@@ -1,0 +1,18 @@
+/home/selcuk/Desktop/media
+info:
+  description: ''
+  title: ''
+  version: ''
+openapi: 3.0.0
+paths:
+  /token/:
+    post:
+      description: 'Takes a set of user credentials and returns an access and refresh
+        JSON web
+
+        token pair to prove the authentication of those credentials.'
+      operationId: token_create
+      tags:
+      - token
+servers:
+- url: ''
