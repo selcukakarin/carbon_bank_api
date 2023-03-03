@@ -37,3 +37,4 @@ Endpoints for this project are documented in `<hostname>/swagger/`
 
 
 
+![Swagger](https://github.com/selcukakarin/carbon_bank_api/blob/master/Carbon-Bank-API.png)
