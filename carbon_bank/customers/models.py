@@ -17,7 +17,7 @@ class Customer(CustomBaseClass):
     guid = models.UUIDField(unique=True, editable=False, default=uuid.uuid4)
     identity_number = models.CharField(max_length=60, unique=True)
     address = models.TextField()
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='customer')
     sex = models.CharField(choices=SEX_CHOICES, max_length=6)
 
     def __str__(self):

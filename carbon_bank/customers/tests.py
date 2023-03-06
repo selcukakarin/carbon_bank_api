@@ -1,9 +1,11 @@
+import ipdb
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase, APIRequestFactory, force_authenticate
 
-from customers.api.views import CustomerViewSet
+from management.models import BankAccount
+from .api.views import CustomerCreateAPIView
 from .models import Customer
 
 
@@ -11,8 +13,36 @@ class CustomerAPITest(APITestCase):
 
     def setUp(self):
         self.factory = APIRequestFactory()
+        self.user = User.objects.create_superuser(
+            email='tes111t@test.com',
+            password='test123',
+            username="test_user"
+        )
+        self.client.force_authenticate(user=self.user)
 
-    def test_register_customer(self):
+    @classmethod
+    def create_customer(cls, email, identity_id):
+        user = User.objects.create_user(
+            username=email,
+            email=email,
+            password='test123',
+            first_name='selcuk',
+            last_name='akarın',
+        )
+
+        customer = Customer.objects.create(
+            identity_number=identity_id,
+            address='istanbul',
+            sex=Customer.MALE,
+            user=user,
+        )
+
+        BankAccount.objects.create(
+            account_number=BankAccount.generate_account_number(),
+            owner=customer,
+        )
+
+    def test_create_customer(self):
         payload = {
             'first_name': 'selcuk',
             'last_name': 'akarın',
@@ -22,16 +52,13 @@ class CustomerAPITest(APITestCase):
             'email': 'selcuk@gmail.com',
             'password': 'Selcuk123',
         }
-
-        url = reverse('customers:customer-list')
-        request = self.factory.post(path=url, data=payload)
-        view = CustomerViewSet.as_view({'post': 'create'})
-        response = view(request)
+        url = reverse('customers:create')
+        response = self.client.post(url, payload)
         customer = Customer.objects.get(user__username='selcuk@gmail.com')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertFalse(customer.bankaccount.is_active)
 
-    def test_register_customer_with_email_exists(self):
+    def test_create_customer_with_email_exists(self):
         user = User.objects.create_user(
             username='selcuk51@carbonbank.com',
             email='selcuk51@carbonbank.com',
@@ -56,22 +83,19 @@ class CustomerAPITest(APITestCase):
             'address': 'halkalı istanbul',
         }
 
-        url = reverse('customers:customer-list')
-        request = self.factory.post(path=url, data=payload)
-        view = CustomerViewSet.as_view({'post': 'create'})
-        response = view(request)
+        url = reverse('customers:create')
+        response = self.client.post(url, payload)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.data, {
             'username': ['This username is already exists.'],
         })
 
     def test_retrieve_customer_account(self):
-        self.test_register_customer()
-        customer = Customer.objects.get(user__username='selcuk@gmail.com')
-
-        url = reverse('customers:customer-list')
-        request = self.factory.get(path=url)
-        force_authenticate(request, customer.user)
-        view = CustomerViewSet.as_view({'get': 'list'})
-        response = view(request)
+        self.create_customer('selcuk1@gmail.com', '123456')
+        self.create_customer('selcuk2@gmail.com', '1234561')
+        # customer1 = Customer.objects.get(user__username='selcuk1@gmail.com')
+        url = reverse('customers:list')
+        response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(
+            response.data["count"] == Customer.objects.all().count())

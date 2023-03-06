@@ -7,8 +7,3 @@ class IsCustomer(IsAuthenticated):
         authenticated = super(IsCustomer, self).has_permission(request, view)
         return authenticated and hasattr(request.user, 'customer')
 
-
-class IsBankAdmin(IsCustomer):
-
-    def has_object_permission(self, request, view, obj):
-        return obj.owner == request.user.customer

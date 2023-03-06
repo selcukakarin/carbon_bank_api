@@ -36,7 +36,8 @@ class BankAccount(CustomBaseClass):
         return ''.join(random.choice('0123456789ABCDEFGHIKLMNOPRS') for _ in range(13))
 
     def __str__(self):
-        return f'Account number: {self.account_number}     Balance: {self.total_balance}      Owner: {self.owner.fullname}'
+        return f'Account number: {self.account_number}     Balance: {self.total_balance}      Owner: {self.owner.fullname}' \
+               f'Guid: {self.owner.guid}'
 
 
 class BankTransaction(CustomBaseClass):

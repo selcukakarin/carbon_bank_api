@@ -20,6 +20,14 @@ class AccountSerializer(serializers.ModelSerializer):
         ]
 
 
+class AccountActivateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BankAccount
+        fields = [
+            'is_active'
+        ]
+
+
 class TransactionSerializer(serializers.ModelSerializer):
     bank_account = serializers.CharField(source='bank_account.account_number')
     sender = serializers.CharField(source='sender.user.get_full_name')
@@ -35,6 +43,7 @@ class TransactionSerializer(serializers.ModelSerializer):
 class DepositTransactionSerializer(serializers.Serializer):
     sender = serializers.PrimaryKeyRelatedField(
         queryset=Customer.objects.filter(is_deleted=False),
+        write_only=True
     )
     amount = serializers.DecimalField(max_digits=12, decimal_places=2)
 
