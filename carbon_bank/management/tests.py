@@ -94,7 +94,10 @@ class BankAccountViewSetAPITest(APITestCase):
 
         # deposit with active account
         url = reverse('management:deposit')
-        data = {'amount': 20000, 'sender': customer.pk}
+        data = {
+            'amount': 20000,
+            # 'sender': customer.pk
+        }
         response = self.client.post(url, data)
         bankaccount.refresh_from_db()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -118,7 +121,7 @@ class BankAccountViewSetAPITest(APITestCase):
 
         # withdraw with active account
         data = {
-            'sender': customer.pk,
+            # 'sender': customer.pk,
             'amount': 10,
         }
         url = reverse('management:withdraw')
@@ -136,7 +139,6 @@ class BankAccountViewSetAPITest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(str(response.data['sender'][0]), 'Bank account is not active.')
 
-
     def test_withdraw_account_with_amount_exceeded(self):
         self.create_customer('selcuk1@gmail.com', '12345')
         customer = Customer.objects.get(user__email='selcuk1@gmail.com')
@@ -146,7 +148,7 @@ class BankAccountViewSetAPITest(APITestCase):
         self.create_deposit(bank_account, 100)
 
         data = {
-            'sender': customer.pk,
+            # 'sender': customer.pk,
             'amount': 500,
         }
         url = reverse('management:withdraw')
