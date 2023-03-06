@@ -13,6 +13,9 @@ from .serializers import (AccountSerializer, DepositTransactionSerializer,
 
 
 class CreateDeposit(CreateAPIView):
+    """
+        Send money to your bank account.
+    """
     queryset = BankTransaction.objects.filter(is_deleted=False)
     serializer_class = DepositTransactionSerializer
     permission_classes = [IsCustomer]
@@ -29,6 +32,9 @@ class CreateDeposit(CreateAPIView):
 
 
 class CreateTransfer(CreateAPIView):
+    """
+        Make a money transfer
+    """
     queryset = BankTransaction.objects.filter(is_deleted=False)
     serializer_class = TransferTransactionSerializer
     permission_classes = [IsAdminUser | IsCustomer, ]
@@ -45,6 +51,9 @@ class CreateTransfer(CreateAPIView):
 
 
 class CreateWithdraw(CreateAPIView):
+    """
+        Withdraw money from your bank account.
+    """
     queryset = BankTransaction.objects.filter(is_deleted=False)
     serializer_class = WithdrawSerializer
     permission_classes = [IsCustomer]
@@ -61,6 +70,9 @@ class CreateWithdraw(CreateAPIView):
 
 
 class AccountListAPIView(ListAPIView):
+    """
+        List all accounts for a specific user or get your own account.
+    """
     serializer_class = AccountSerializer
     queryset = BankAccount.objects.filter(is_deleted=False)
     permission_classes = [IsAdminUser | IsCustomer]
@@ -72,10 +84,13 @@ class AccountListAPIView(ListAPIView):
 
 
 class ActivateAccountView(RetrieveUpdateAPIView):
+    """
+        Activate Account. you should be admin. guid = Account guid
+    """
     serializer_class = AccountActivateSerializer
     queryset = BankAccount.objects.filter(is_deleted=False)
     lookup_field = 'guid'
-    # permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUser]
 
 
 class TransactionListAPIView(ListAPIView):
