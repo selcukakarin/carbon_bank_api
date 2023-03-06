@@ -34,6 +34,13 @@ class CustomerListAPIView(ListAPIView):
     serializer_class = CustomerListSerializer
     queryset = Customer.objects.filter(is_deleted=False).order_by('-created_date')
 
+    def get_queryset(self):
+        queryset = Customer.objects.filter(is_deleted=False).order_by('-created_date')
+        query = self.request.GET.get("q")
+        if query:
+            queryset = queryset.filter(user__username__icontains=query)
+        return queryset
+
 
 class GetBalanceAPIView(RetrieveAPIView):
     """

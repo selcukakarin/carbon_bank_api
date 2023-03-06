@@ -41,14 +41,15 @@ class TransactionSerializer(serializers.ModelSerializer):
 
 
 class DepositTransactionSerializer(serializers.Serializer):
-    sender = serializers.PrimaryKeyRelatedField(
-        queryset=Customer.objects.filter(is_deleted=False),
-        write_only=True
-    )
+    # sender = serializers.PrimaryKeyRelatedField(
+    #     queryset=Customer.objects.filter(is_deleted=False),
+    #     write_only=True
+    # )
     amount = serializers.DecimalField(max_digits=12, decimal_places=2)
 
     def validate(self, attrs):
-        sender = attrs.get('sender')
+        # sender = attrs.get('sender')
+        sender = Customer.objects.get(user=self.context["request"].user)
         if not sender.bankaccount.is_active:
             raise serializers.ValidationError({
                 'sender': 'Bank account is not active.'
@@ -57,7 +58,7 @@ class DepositTransactionSerializer(serializers.Serializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        sender = validated_data.get('sender')
+        sender = Customer.objects.get(user=self.context["request"].user)
         deposit_amount = validated_data.get('amount')
         deposit_tran = BankTransaction()
         deposit_tran.bank_account = sender.bankaccount
@@ -76,7 +77,7 @@ class WithdrawSerializer(DepositTransactionSerializer):
 
     @transaction.atomic
     def create(self, validated_data):
-        sender = validated_data.get('sender')
+        sender = Customer.objects.get(user=self.context["request"].user)
         deposit_amount = validated_data.get('amount')
         sender_bank = BankAccount.objects.select_for_update().get(
             pk=sender.bankaccount.pk,
@@ -161,17 +162,3 @@ class TransferTransactionSerializer(serializers.Serializer):
 
         serializer = TransactionSerializer(instance=transaction_sender)
         return serializer.data
-
-
-class MutationSerializer(serializers.ModelSerializer):
-    sender = serializers.CharField(source='bank_account.account_number')
-    status = serializers.SerializerMethodField()
-
-    def get_status(self, obj):
-        return 'Debit' if obj.is_debit else 'Credit'
-
-    class Meta:
-        model = BankTransaction
-        fields = [
-            'id', 'created_date', 'amount', 'status', 'sender', 'description'
-        ]
