@@ -30,8 +30,8 @@ class AccountActivateSerializer(serializers.ModelSerializer):
 
 class TransactionSerializer(serializers.ModelSerializer):
     bank_account = serializers.CharField(source='bank_account.account_number')
-    sender = serializers.CharField(source='sender.user.get_full_name')
-    receiver = serializers.CharField(source='receiver.user.get_full_name')
+    sender = serializers.CharField(source='sender.user.email')
+    receiver = serializers.CharField(source='receiver.user.email')
 
     class Meta:
         model = BankTransaction
